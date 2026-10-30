@@ -1,7 +1,7 @@
 {
   "name": "vr-mod-inspector-ai",
   "version": "1.0.0",
-  "description": "Multi-user VR Mod Inspector with Global Shared AI Memory",
+  "description": "Multi-user VR Mod Inspector with Offline AI and Feedback System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

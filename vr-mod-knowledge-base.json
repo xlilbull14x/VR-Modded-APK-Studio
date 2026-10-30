@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "targetPlatforms": ["Meta Quest 2", "Meta Quest Pro", "Meta Quest 3", "Pico 4", "Pico Neo 3"],
+  "commonLibraries": {
+    "system": [
+      "libunity.so", "libil2cpp.so", "libovrloader.so", "libopenxr_loader.so",
+      "libmain.so", "libmono.so", "libvrapi.so", "libgdx.so", "libeura.so",
+      "libglesv1_cm.so", "libglesv2.so", "libglesv3.so", "libegl.so", "libvulkan.so"
+    ],
+    "modFrameworks": [
+      "libquest-hook.so", "libbeatsaber-hook.so", "libmelonloader.so",
+      "libbepinex.so", "libsl2.so", "libmodloader.so"
+    ]
+  },
+  "hookTemplates": {
+    "il2cpp_cplusplus": {
+      "language": "C++",
+      "framework": "SubHook / QuestHook",
+      "code": "#include <android/log.h>\n#include \"subhook.h\"\n\n// Defines function pointer signature\ntypedef void (*PlayerController_Update_t)(void* instance);\nPlayerController_Update_t orig_PlayerController_Update = nullptr;\n\n// Detour / Hook function\nvoid hk_PlayerController_Update(void* instance) {\n    __android_log_print(ANDROID_LOG_INFO, \"VR_AI_HOOK\", \"PlayerController_Update called!\");\n    // Inject custom VR logic (e.g. speed multiplier, stamina modification) here\n    orig_PlayerController_Update(instance);\n}\n\n// Initialization\nvoid InstallHooks() {\n    uintptr_t il2cpp_base = get_module_base(\"libil2cpp.so\");\n    // SubHook offset attachment\n    subhook_new((void*)(il2cpp_base + 0x123456), (void*)&hk_PlayerController_Update, SUBHOOK_64BIT_OFFSET);\n}"
+    },
+    "csharp_harmony": {
+      "language": "C#",
+      "framework": "Harmony / MelonLoader",
+      "code": "using HarmonyLib;\nusing UnityEngine;\n\n[HarmonyPatch(typeof(PlayerController), \"Update\")]\npublic class PlayerUpdatePatch {\n    static void Prefix(PlayerController __instance) {\n        // Code executed before original Update\n    }\n    static void Postfix(PlayerController __instance) {\n        // Code executed after original Update\n    }\n}"
+    }
+  },
+  "troubleshootingGuides": {
+    "Crashes on Launch": "Check if libil2cpp.so symbols match your target target architecture (ARM64 / v8a). Verify NDK build alignment.",
+    "Missing Libraries": "Ensure custom .so files are placed in /lib/arm64-v8a/ inside the APK before re-aligning and zipaligning.",
+    "Banned / Flagged": "Avoid hooking directly into Oculus Platform / OpenXR entitlement verification methods in libovrloader.so."
+  }
+}
